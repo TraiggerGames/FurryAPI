@@ -2,8 +2,13 @@ package es.recha.furry.model;
 
 import jakarta.persistence.*;
 import java.time.Instant;
+import lombok.*;
 
 @Entity
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
 @Table(name="furry_universo",
         uniqueConstraints = @UniqueConstraint(name="ux_fu_furry_universo", columnNames={"furry_id","universo_id"}))
 public class FurryUniverso {
@@ -32,19 +37,5 @@ public class FurryUniverso {
 
     @PrePersist void prePersist() { this.createdAt = Instant.now(); }
 
-    public Long getId() { return id; }
 
-    public Furry getFurry() { return furry; }
-    public void setFurry(Furry furry) { this.furry = furry; }
-
-    public Universo getUniverso() { return universo; }
-    public void setUniverso(Universo universo) { this.universo = universo; }
-
-    public LinkOrigen getOrigen() { return origen; }
-    public void setOrigen(LinkOrigen origen) { this.origen = origen; }
-
-    public String getNota() { return nota; }
-    public void setNota(String nota) { this.nota = nota; }
-
-    public Instant getCreatedAt() { return createdAt; }
 }

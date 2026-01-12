@@ -2,8 +2,13 @@ package es.recha.furry.model;
 
 import jakarta.persistence.*;
 import java.time.Instant;
+import lombok.*;
 
 @Entity
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
 @Table(name="universo",
         uniqueConstraints = {
                 @UniqueConstraint(name="ux_universo_slug", columnNames="slug"),
@@ -45,26 +50,4 @@ public class Universo {
     @PrePersist void prePersist() { this.createdAt = Instant.now(); }
     @PreUpdate void preUpdate() { this.updatedAt = Instant.now(); }
 
-    public Long getId() { return id; }
-
-    public String getNombre() { return nombre; }
-    public void setNombre(String nombre) { this.nombre = nombre; }
-
-    public String getSlug() { return slug; }
-    public void setSlug(String slug) { this.slug = slug; }
-
-    public String getDescripcion() { return descripcion; }
-    public void setDescripcion(String descripcion) { this.descripcion = descripcion; }
-
-    public User getOwner() { return owner; }
-    public void setOwner(User owner) { this.owner = owner; }
-
-    public Visibility getVisibility() { return visibility; }
-    public void setVisibility(Visibility visibility) { this.visibility = visibility; }
-
-    public ContentStatus getStatus() { return status; }
-    public void setStatus(ContentStatus status) { this.status = status; }
-
-    public Instant getCreatedAt() { return createdAt; }
-    public Instant getUpdatedAt() { return updatedAt; }
 }

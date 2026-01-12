@@ -1,9 +1,15 @@
 package es.recha.furry.model;
 
 import jakarta.persistence.*;
+import lombok.*;
+
 import java.time.Instant;
 
 @Entity
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
 @Table(name="furry",
         uniqueConstraints = @UniqueConstraint(name="ux_furry_slug", columnNames="slug"))
 public class Furry {
@@ -52,35 +58,4 @@ public class Furry {
     @PrePersist void prePersist() { this.createdAt = Instant.now(); }
     @PreUpdate void preUpdate() { this.updatedAt = Instant.now(); }
 
-    public Long getId() { return id; }
-
-    public String getNombre() { return nombre; }
-    public void setNombre(String nombre) { this.nombre = nombre; }
-
-    public String getSlug() { return slug; }
-    public void setSlug(String slug) { this.slug = slug; }
-
-    public String getAlias() { return alias; }
-    public void setAlias(String alias) { this.alias = alias; }
-
-    public String getDescripcion() { return descripcion; }
-    public void setDescripcion(String descripcion) { this.descripcion = descripcion; }
-
-    public String getImagenUrl() { return imagenUrl; }
-    public void setImagenUrl(String imagenUrl) { this.imagenUrl = imagenUrl; }
-
-    public Tipo getTipo() { return tipo; }
-    public void setTipo(Tipo tipo) { this.tipo = tipo; }
-
-    public User getOwner() { return owner; }
-    public void setOwner(User owner) { this.owner = owner; }
-
-    public Visibility getVisibility() { return visibility; }
-    public void setVisibility(Visibility visibility) { this.visibility = visibility; }
-
-    public ContentStatus getStatus() { return status; }
-    public void setStatus(ContentStatus status) { this.status = status; }
-
-    public Instant getCreatedAt() { return createdAt; }
-    public Instant getUpdatedAt() { return updatedAt; }
 }

@@ -2,6 +2,9 @@ package es.recha.furry.service;
 
 import es.recha.furry.model.*;
 import es.recha.furry.repositories.*;
+import es.recha.furry.service.exceptions.BadRequestException;
+import es.recha.furry.service.exceptions.ConflictException;
+import es.recha.furry.service.exceptions.NotFoundException;
 import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
 
@@ -11,34 +14,36 @@ import java.util.List;
 public class FurryService {
 
     private final FurryRepository furryRepository;
-    private final TipoRepository tipoRepository;
-    private final UserRepository userRepository;
+    private final FurryUniversoRepository furryUniversoRepository;
+    private final LinkOrigenRepository linkOrigenRepository;
+
+    private final TipoService tipoService;
+    private final UniversoService universoService;
+    private final UserService userService;
+
     private final VisibilityRepository visibilityRepository;
     private final ContentStatusRepository contentStatusRepository;
-    private final UniversoRepository universoRepository;
-    private final LinkOrigenRepository linkOrigenRepository;
-    private final FurryUniversoRepository furryUniversoRepository;
     private final SlugService slugService;
 
     public FurryService(
             FurryRepository furryRepository,
-            TipoRepository tipoRepository,
-            UserRepository userRepository,
+            FurryUniversoRepository furryUniversoRepository,
+            LinkOrigenRepository linkOrigenRepository,
+            TipoService tipoService,
+            UniversoService universoService,
+            UserService userService,
             VisibilityRepository visibilityRepository,
             ContentStatusRepository contentStatusRepository,
-            UniversoRepository universoRepository,
-            LinkOrigenRepository linkOrigenRepository,
-            FurryUniversoRepository furryUniversoRepository,
             SlugService slugService
     ) {
         this.furryRepository = furryRepository;
-        this.tipoRepository = tipoRepository;
-        this.userRepository = userRepository;
+        this.furryUniversoRepository = furryUniversoRepository;
+        this.linkOrigenRepository = linkOrigenRepository;
+        this.tipoService = tipoService;
+        this.universoService = universoService;
+        this.userService = userService;
         this.visibilityRepository = visibilityRepository;
         this.contentStatusRepository = contentStatusRepository;
-        this.universoRepository = universoRepository;
-        this.linkOrigenRepository = linkOrigenRepository;
-        this.furryUniversoRepository = furryUniversoRepository;
         this.slugService = slugService;
     }
 
@@ -48,35 +53,26 @@ public class FurryService {
 
     public Furry getBySlug(String slug) {
         return furryRepository.findBySlug(slug)
-                .orElseThrow(() -> new IllegalArgumentException("Furry no encontrado: " + slug));
+                .orElseThrow(() -> new NotFoundException("Furry no encontrado: " + slug));
     }
 
     @Transactional
     public Furry create(String nombre, String alias, String descripcion, String imagenUrl,
                         String tipoSlug, Long ownerId, String visibilityCode) {
 
-        if (nombre == null || nombre.isBlank()) {
-            throw new IllegalArgumentException("nombre es obligatorio");
-        }
-        if (tipoSlug == null || tipoSlug.isBlank()) {
-            throw new IllegalArgumentException("tipoSlug es obligatorio");
-        }
-        if (ownerId == null) {
-            throw new IllegalArgumentException("ownerId es obligatorio");
-        }
+        if (nombre == null || nombre.isBlank()) throw new BadRequestException("nombre es obligatorio");
+        if (tipoSlug == null || tipoSlug.isBlank()) throw new BadRequestException("tipoSlug es obligatorio");
+        if (ownerId == null) throw new BadRequestException("ownerId es obligatorio");
 
-        Tipo tipo = tipoRepository.findBySlug(tipoSlug)
-                .orElseThrow(() -> new IllegalArgumentException("Tipo no existe: " + tipoSlug));
-
-        User owner = userRepository.findById(ownerId)
-                .orElseThrow(() -> new IllegalArgumentException("Owner no existe"));
+        Tipo tipo = tipoService.getBySlug(tipoSlug);
+        User owner = userService.getById(ownerId);
 
         String visCode = (visibilityCode == null || visibilityCode.isBlank()) ? "PUBLIC" : visibilityCode;
         Visibility visibility = visibilityRepository.findById(visCode)
-                .orElseThrow(() -> new IllegalArgumentException("Visibility inválida: " + visCode));
+                .orElseThrow(() -> new NotFoundException("Visibility inválida: " + visCode));
 
         ContentStatus status = contentStatusRepository.findById("ACTIVE")
-                .orElseThrow(() -> new IllegalArgumentException("Falta content_status ACTIVE en BD"));
+                .orElseThrow(() -> new NotFoundException("Falta content_status ACTIVE en BD"));
 
         Furry f = new Furry();
         f.setNombre(nombre);
@@ -96,24 +92,19 @@ public class FurryService {
 
     @Transactional
     public FurryUniverso linkToUniverso(String furrySlug, String universoSlug, String origenCode, String nota) {
-        if (furrySlug == null || furrySlug.isBlank()) {
-            throw new IllegalArgumentException("furrySlug es obligatorio");
-        }
-        if (universoSlug == null || universoSlug.isBlank()) {
-            throw new IllegalArgumentException("universoSlug es obligatorio");
-        }
+        if (furrySlug == null || furrySlug.isBlank()) throw new BadRequestException("furrySlug es obligatorio");
+        if (universoSlug == null || universoSlug.isBlank()) throw new BadRequestException("universoSlug es obligatorio");
 
         Furry furry = getBySlug(furrySlug);
-        Universo universo = universoRepository.findBySlug(universoSlug)
-                .orElseThrow(() -> new IllegalArgumentException("Universo no encontrado: " + universoSlug));
+        Universo universo = universoService.getBySlug(universoSlug);
 
         if (furryUniversoRepository.findByFurryIdAndUniversoId(furry.getId(), universo.getId()).isPresent()) {
-            throw new IllegalArgumentException("Ya existe el vínculo furry-universo");
+            throw new ConflictException("Ya existe el vínculo furry-universo");
         }
 
         String orgCode = (origenCode == null || origenCode.isBlank()) ? "OTRO" : origenCode;
         LinkOrigen origen = linkOrigenRepository.findById(orgCode)
-                .orElseThrow(() -> new IllegalArgumentException("Origen inválido: " + orgCode));
+                .orElseThrow(() -> new NotFoundException("Origen inválido: " + orgCode));
 
         FurryUniverso fu = new FurryUniverso();
         fu.setFurry(furry);

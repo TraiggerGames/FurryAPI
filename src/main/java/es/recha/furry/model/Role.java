@@ -1,8 +1,12 @@
 package es.recha.furry.model;
 
 import jakarta.persistence.*;
+import lombok.*;
+
 
 @Entity
+@Getter
+@Setter
 @Table(name = "roles", uniqueConstraints = @UniqueConstraint(name="ux_roles_name", columnNames = "name"))
 public class Role {
 

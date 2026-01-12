@@ -1,8 +1,11 @@
 package es.recha.furry.model;
 
 import jakarta.persistence.*;
-
+import lombok.*;
 @Entity
+@Getter
+@Setter
+
 @Table(name = "visibility")
 public class Visibility {
     @Id
@@ -19,9 +22,5 @@ public class Visibility {
         this.description = description;
     }
 
-    public String getCode() { return code; }
-    public void setCode(String code) { this.code = code; }
 
-    public String getDescription() { return description; }
-    public void setDescription(String description) { this.description = description; }
 }

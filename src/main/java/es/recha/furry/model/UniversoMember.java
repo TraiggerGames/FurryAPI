@@ -2,8 +2,12 @@ package es.recha.furry.model;
 
 import jakarta.persistence.*;
 import java.time.Instant;
-
+import lombok.*;
 @Entity
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
 @Table(name="universo_member",
         uniqueConstraints = @UniqueConstraint(name="ux_universo_member", columnNames={"universo_id","user_id"}))
 public class UniversoMember {
@@ -28,16 +32,5 @@ public class UniversoMember {
 
     @PrePersist void prePersist() { this.createdAt = Instant.now(); }
 
-    public Long getId() { return id; }
 
-    public Universo getUniverso() { return universo; }
-    public void setUniverso(Universo universo) { this.universo = universo; }
-
-    public User getUser() { return user; }
-    public void setUser(User user) { this.user = user; }
-
-    public String getPermission() { return permission; }
-    public void setPermission(String permission) { this.permission = permission; }
-
-    public Instant getCreatedAt() { return createdAt; }
 }
